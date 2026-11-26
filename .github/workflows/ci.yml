@@ -1,0 +1,46 @@
+
+name: Pipeline de Integracion Continua
+
+# Ejecutar automaticamente cuando se suban cambios
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  integracion-continua:
+    runs-on: ubuntu-latest
+
+    steps:
+      # ETAPA 1: Clonar repositorio
+      - name: 1. Clonar repositorio
+        uses: actions/checkout@v4
+
+      # ETAPA 2: Configurar Python e instalar dependencias
+      - name: 2. Instalar dependencias
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Instalar Pytest
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # ETAPA 3: Ejecutar pruebas
+      - name: 3. Ejecutar pruebas
+        run: |
+          python -m pytest -v
+
+      # ETAPA 4: Construir proyecto
+      - name: 4. Construir proyecto
+        run: |
+          python -m compileall -q calculadora.py tests
+          echo "Construccion del proyecto completada correctamente"
+
+      # ETAPA 5: Simular despliegue
+      - name: 5. Simular despliegue
+        if: success()
+        run: |
+          echo "Despliegue realizado correctamente en ambiente de pruebas"
